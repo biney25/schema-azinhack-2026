@@ -17,7 +17,7 @@ export function TinyFishContext({onCreate}:{onCreate:(p:{title:string;date:strin
   const check=async()=>{if(closed||pending)return;pending=true;
    try{
     const res=await fetch('/api/tinyfish?token='+encodeURIComponent(token),{cache:'no-store'});
-    const data=await res.json();if(!res.ok)throw new Error(data.error||'Could not check research');
+    const data:any=await res.json();if(!res.ok)throw new Error(data.error||'Could not check research');
     if(closed)return;
     if(data.status==='COMPLETED'){setFacts(data.facts);setToken('');setBusy(false);return;}
     if(['FAILED','CANCELLED'].includes(data.status))throw new Error(data.error||'Research did not finish');
@@ -30,7 +30,7 @@ export function TinyFishContext({onCreate}:{onCreate:(p:{title:string;date:strin
  const start=async()=>{setError('');setFacts(null);setSelected([]);
   if(!consent){setError('Confirm that this link is public first.');return;}
   setBusy(true);
-  try{const res=await fetch('/api/tinyfish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});const data=await res.json();if(!res.ok)throw new Error(data.error||'TinyFish is not available');setToken(data.token);}
+  try{const res=await fetch('/api/tinyfish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});const data:any=await res.json();if(!res.ok)throw new Error(data.error||'TinyFish is not available');setToken(data.token);}
   catch(e:any){setError(e?.message||'Could not start research');setBusy(false);}
  };
  const chosen=fields.filter(f=>selected.includes(f)&&facts&&(f==='lineup'?facts.lineup.length:!!facts[f]));
