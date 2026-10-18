@@ -1,0 +1,7 @@
+export async function api(path: string, options: RequestInit = {}) { const response = await fetch('/api/' + path, { ...options, headers: { ...(typeof options.body === 'string' ? { 'Content-Type': 'application/json' } : {}), ...options.headers } }); const result: any = await response.json(); if (!response.ok)
+    throw Object.assign(new Error(result.error ?? 'Please try again'), { status: response.status }); return result; }
+export {saveDraft,removeDraft,listDrafts,clearDrafts} from './device-vault.mjs';
+export async function prepareImage(file: File): Promise<Blob> { if (!file.type.startsWith('image/'))
+    throw new Error('Choose a photo'); if (file.size > 30 * 1024 ** 2)
+    throw new Error('Choose a photo below 30 MB'); const bitmap = await createImageBitmap(file); const scale = Math.min(1, 2400 / Math.max(bitmap.width, bitmap.height)); const canvas = document.createElement('canvas'); canvas.width = bitmap.width * scale; canvas.height = bitmap.height * scale; canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close(); return new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('Could not prepare this photo')), 'image/jpeg', .88)); }
+export function entryPayload(e: any) { return { id: e.id, title: e.title, body: e.body, date: e.date, mood: e.mood, theme: e.theme, layout: e.layout, tags: e.tags ?? [], people: e.people ?? [], place: e.place ?? '', assets: e.assets ?? [], blocks: e.blocks ?? [], favorite: !!e.favorite, aiAllowed: !!e.aiAllowed, version: e.version }; }

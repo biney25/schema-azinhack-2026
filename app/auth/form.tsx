@@ -1,0 +1,20 @@
+'use client';
+import {useState} from 'react';
+import {Lock,ArrowRight,Mail,Loader2} from 'lucide-react';
+import {api} from '@/lib/client';
+const content:any={login:['Welcome back, lovely.','Your photos. Your words. Your little world.','Open my journal'],signup:['A place for your life.','Start a private notebook for the moments you want to keep.','Create my account'],forgot:['Let’s find your way back.','We’ll send a link if an account uses this address.','Send recovery link'],resend:['One little check.','Verify your email to keep your journal connected to you.','Resend verification'],reset:['A fresh key to your journal.','Choose a new account password. Your device passphrase stays separate.','Save new password'],logout:['Take a little pause.','Your saved pages will be here when you return.','Sign out of this device']};
+export function AuthForm({action,linkExpired=false}:{action:string;linkExpired?:boolean}){
+ const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[again,setAgain]=useState(''),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState(linkExpired?'That link expired or was already used. Request a fresh one below.':''),[cooldown,setCooldown]=useState(false);
+ const [title,description,label]=content[action]??content.login;
+ async function submit(e:React.FormEvent){e.preventDefault();if(['signup','reset'].includes(action)&&password!==again){setError('The passwords do not match.');return;}setBusy(true);setError('');setMessage('');try{
+  const r=await api('auth/'+action,{method:'POST',body:JSON.stringify({email,password})});
+  if(action==='login'||action==='reset')location.assign('/');else if(action==='logout')location.assign('/auth/login');else{setMessage(r.message);setCooldown(true);setTimeout(()=>setCooldown(false),60000);}
+ }catch(e:any){setError(e.message);}finally{setBusy(false);}}
+ return <main className="auth-screen"><section className="auth-story"><a className="brand" href="/">schema<span>✳</span></a><span className="eyebrow">THE LITTLE THINGS, KEPT.</span><h1>A life made of<br/><em>ordinary magic.</em></h1><img src="/art/journal.png" alt="A scrapbook with flowers, paper and space for memories"/><p className="handwritten">come as you are.</p></section><section className="auth-paper"><span className="auth-flower">✿</span><span className="eyebrow"><Lock size={14}/> YOUR PRIVATE LITTLE WORLD</span><h2>{title}</h2><p>{description}</p><form onSubmit={submit}>
+  {!['reset','logout'].includes(action)&&<label>Email address<input type="email" autoComplete="email" required maxLength={254} value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label>}
+  {['login','signup','reset'].includes(action)&&<label>{action==='reset'?'New password':'Password'}<input type="password" autoComplete={action==='login'?'current-password':'new-password'} minLength={action==='login'?1:12} maxLength={256} required value={password} onChange={e=>setPassword(e.target.value)}/></label>}
+  {['signup','reset'].includes(action)&&<><label>Repeat password<input type="password" autoComplete="new-password" required value={again} onChange={e=>setAgain(e.target.value)}/></label><p className="help-text">Use at least 12 characters. A long, unique passphrase works well.</p></>}
+  {error&&<p className="auth-error" role="alert">{error}</p>}{message&&<p className="auth-success" role="status"><Mail size={18}/>{message}</p>}
+  <button className="primary full" disabled={busy||cooldown}>{busy?<Loader2 className="spin" size={18}/>:null}{cooldown?'You can resend in a minute':label}<ArrowRight size={17}/></button>
+ </form><nav className="auth-links">{action==='login'?<><a href="/auth/signup">Make a new notebook</a><a href="/auth/forgot">Forgot password?</a><a href="/auth/resend">Resend verification</a></>:<a href="/auth/login">Back to sign in</a>}</nav><p className="help-text">Your journal starts private. AI, imports and sharing are separate choices. Account verification links should be opened in the browser where you requested them.</p></section></main>;
+}

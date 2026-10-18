@@ -1,0 +1,1 @@
+ALTER TABLE `assets` ADD `state` text DEFAULT 'ready' NOT NULL;
