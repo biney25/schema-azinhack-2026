@@ -16,6 +16,7 @@ async function route(req:Request){
     if(!error&&data?.user?.email_confirmed_at){userId=data.user.id;userEmail=data.user.email??null;}
   }else {userId=ctx.user?.userId??null;userEmail=ctx.user?.email??null;}
   if(!userId)return blocked('Sign in to research an event.',401);
+  if(ctx.mode!=='customer')return blocked('Use an isolated customer demo host for TinyFish.',503);
   if(ctx.env.TINYFISH_ENABLED!=='true'||!ctx.env.TINYFISH_API_KEY)return blocked('TinyFish is not configured for this copy yet.',503);
   // Hackathon-only allowlist keeps API spend bounded to authorized demo accounts.
   const allowed=String(ctx.env.TINYFISH_ALLOWED_EMAILS??'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
@@ -28,6 +29,8 @@ async function route(req:Request){
     let payload:any;try{payload=await req.json()}catch{return blocked('Invalid request body.');}
     const url=parsePublicUrl(payload?.url);
     if(JSON.stringify(payload).length>3000)return blocked('Request too large.',413);
+    const {error:quotaError}=await ctx.client.rpc('schema_hackathon_reserve',{p_kind:'tinyfish'});
+    if(quotaError)return blocked(quotaError.code==='PT429'?'Daily event research limit reached.':'Apply the isolated demo quota migration before TinyFish usage.',quotaError.code==='PT429'?429:503);
     // Only a PUBLIC link and a fixed, task-scoped goal are sent to TinyFish.
     const upstream=await fetch(BASE+'/automation/run-async',{
       method:'POST',headers:{'Content-Type':'application/json','X-API-Key':key},
