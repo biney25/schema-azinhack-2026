@@ -109,3 +109,7 @@ The original source checkpoint historically reports 77 existing automated tests.
 This snapshot intentionally omits the original project's private continuation notes, provider-specific operations records, and local state. No real .env files, live credentials, journals, database export, access tokens or user photos should ever be committed. Re-run secret scanning before publishing any subsequent commit. Public code is not a public journal: all records and media remain private in user-controlled storage.
 
 **License note:** This release is provided for hackathon review. Its appearance on GitHub does not, by itself, grant redistribution or commercial relicensing rights. Some bundled UI/build dependencies retain their own upstream license files.
+
+## Security verification gate
+
+The hackathon TinyFish route is customer-host-only and its new SQL quota migration must be applied to an isolated database before enabling research. A verified provider key and live end-to-end run are still required. The standalone personal AI remains a planned feature; do not advertise it as live without implementation and testing.
