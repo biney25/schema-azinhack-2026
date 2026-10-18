@@ -1,0 +1,27 @@
+name: Sync audited presentation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/sync-audited-deck.yml'
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Download audited deck files
+        run: |
+          curl --fail --location --retry 3 --output submission/Schema_AZINHACK_2026_Final.pdf 'https://d2ol7oe51mr4n9.cloudfront.net/user_3KOeKhrcY04SB1W7T5Bv7PCHUEJ/da30d251-0bd7-4a3e-8230-ee262f01795b.pdf'
+          curl --fail --location --retry 3 --output submission/Schema_AZINHACK_2026_Final.pptx 'https://d2ol7oe51mr4n9.cloudfront.net/user_3KOeKhrcY04SB1W7T5Bv7PCHUEJ/b718a804-b5d1-4b4c-b6a1-68e61d41f7d2.pptx'
+          echo '28ce206ca5384d1eff3d089daee2d4b78eb5272259934de2c3fb378a50b15ffe  submission/Schema_AZINHACK_2026_Final.pdf' | sha256sum -c -
+          echo 'ab723e4d42be8bfd867d4329046ca4bea1791d456a9f213c24cd43cd119154cf  submission/Schema_AZINHACK_2026_Final.pptx' | sha256sum -c -
+      - name: Commit audited deck
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add submission/Schema_AZINHACK_2026_Final.pdf submission/Schema_AZINHACK_2026_Final.pptx
+          git diff --cached --quiet || (git commit -m 'Publish audited AZINHACK submission deck' && git push)
