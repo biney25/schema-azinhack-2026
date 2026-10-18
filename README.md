@@ -65,8 +65,9 @@ Prerequisites: **Node.js >=22.13**, **pnpm 11.25** (Corepack), a working platfor
 ```bash
 corepack enable
 corepack pnpm install --frozen-lockfile
-# Supported standalone customer mode: set SUPABASE_URL,
-# SUPABASE_PUBLISHABLE_KEY and APP_ORIGIN privately.
+# Supported standalone customer mode requires SCHEMA_CUSTOMER_HOST=true,
+# SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY and APP_ORIGIN privately.
+# Apply all migrations in a fresh demo project before attempting login.
 # Use the supplied .env.example as a reference; never commit real .env files.
 corepack pnpm run customer:dev
 ```
@@ -79,7 +80,7 @@ TINYFISH_API_KEY=your_server_side_api_key
 TINYFISH_ALLOWED_EMAILS=the_demo_account_email
 ```
 
-Get a key from [TinyFish](https://agent.tinyfish.ai/). The key must **never** be included in frontend code or Git history. When missing, the UI gracefully explains that TinyFish is not configured. Only explicitly allowlisted signed-in demo accounts can use the integration. Also set a TinyFish provider-side spending cap before a public demonstration. For the private Sites deployment, use its authorized Sites workflow and bindings instead of trying to run it independently.
+Get a key from [TinyFish](https://agent.tinyfish.ai/). The key must **never** be included in frontend code or Git history. When missing, the UI gracefully explains that TinyFish is not configured. Only explicitly allowlisted signed-in demo accounts can use the integration. After the hackathon quota migration, five research starts per UTC day are reserved per account (failed runs count). Also set a TinyFish provider-side spending cap before a public demonstration. For the private Sites deployment, use its authorized Sites workflow and bindings instead of trying to run it independently.
 
 **Important setup:** The supplied source contains a customer auth/database adapter, but a fresh contributor has no access to the founder's Supabase project. Follow the migration files on your own isolated Supabase project before attempting customer-mode sign-in. Email confirmation/SMTP and callback URLs also require your own host configuration. Do not point a hackathon demo at the founder's production/customer database.
 
@@ -100,7 +101,7 @@ The original source checkpoint historically reports 77 existing automated tests.
 |---|---|
 | Scrapbook UI, journaling, metadata, year archive | Existing implementation in provided ZIP |
 | Privacy, drafts, export/delete and persistence adapters | Existing implementation; deploy-dependent acceptance outstanding |
-| AI personal memory answers | Consent-gated adapter in code; live provider configuration still required |
+| AI personal memory answers | Consent-gated customer adapter and account quotas included; live provider execution still unverified |
 | TinyFish public-event extract/review | **Implemented in this separate hackathon source**, with local unit tests; needs configured key for end-to-end run |
 | Google Photos whole-library import, native apps, large-scale production certification | **Not implemented / not claimed** |
 
@@ -113,3 +114,7 @@ This snapshot intentionally omits the original project's private continuation no
 ## Security verification gate
 
 The hackathon TinyFish route is customer-host-only and its new SQL quota migration must be applied to an isolated database before enabling research. A verified provider key and live end-to-end run are still required. The standalone personal AI remains a planned feature; do not advertise it as live without implementation and testing.
+
+## Audit remediation (18 October)
+
+Applied customer-only demo request quota migration, disabled private-Sites TinyFish access, tightened customer AI allowlist and consent requirements, removed original Sites hosting metadata, and added [setup](docs/CUSTOMER_SETUP.md), [verification](docs/PHASE_1_VERIFICATION.md), and [operations](docs/OPERATIONS_PHASE_1.md) documentation. Standalone personal AI uses bounded keyword selection and is optional, not production semantic search. These code changes do **not** establish a live paid-service deployment or provider success; verify against a new database and real API keys first.
